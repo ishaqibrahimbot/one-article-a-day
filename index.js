@@ -23,7 +23,7 @@ const app = express();
 
 app.use(express.json());
 
-app.get("/", async (req, res) => {
+app.get("/articles", async (req, res) => {
   if (req.query.new) {
     console.log("new: ", req.query.new);
     const newUrl = req.query.new;
@@ -75,7 +75,7 @@ const sendEmail = async () => {
   return;
 };
 
-app.get("/finished", async (req, res) => {
+app.get("/articles/finished", async (req, res) => {
   const url = req.query.url;
 
   if (!url) {
