@@ -60,7 +60,7 @@ const sendEmail = async () => {
   const randomlySelectedArticle =
     dataObj.articles[Math.floor(Math.random() * dataObj.articles.length)];
 
-  const html = `<h1>Try this one out for today:</h1>
+  const html = `<h3>Try this one out for today:</h3>
   <p><a href="${randomlySelectedArticle}">${randomlySelectedArticle}</a></p>
     <p><a href="http://isquare.lol/articles/finished?url=${randomlySelectedArticle}">Click here if you've finished this one, so that it's not suggested again.</a></p>
       `;
