@@ -3,6 +3,7 @@ const cron = require("node-cron");
 const express = require("express");
 const fs = require("fs/promises");
 const path = require("path");
+const cheerio = require("cheerio");
 const resend = require("resend");
 
 /* From nginx's perspective, let's
@@ -14,6 +15,21 @@ const resend = require("resend");
     - marking an article as finished
     - removing an article
 */
+
+const getMetaData = async (url) => {
+  const data = await fetch(url);
+  const html = await data.text();
+  const $ = cheerio.load(html);
+  const title = $("title").text();
+  const description = $('meta[name="description"]').attr("content");
+  const ogTitle = $('meta[property="og:title"]').attr("content");
+  const ogDescription = $('meta[property="og:description"]').attr("content");
+
+  return {
+    title: title ?? ogTitle ?? "",
+    description: description ?? ogDescription ?? "",
+  };
+};
 
 const resendService = new resend.Resend(process.env.RESEND_API_KEY);
 
@@ -60,12 +76,23 @@ const sendEmail = async () => {
   const randomlySelectedArticle =
     dataObj.articles[Math.floor(Math.random() * dataObj.articles.length)];
 
+  const { title, description } = await getMetaData(randomlySelectedArticle);
+
   const html = `<h3>Try this one out for today:</h3>
-  <p><a href="${randomlySelectedArticle}">${randomlySelectedArticle}</a></p>
+  <p><a href="${randomlySelectedArticle}">${
+    title ?? randomlySelectedArticle
+  }</a></p>
+  <p>${description}</p>
     <p><a href="http://isquare.lol/articles/finished?url=${randomlySelectedArticle}">Click here if you've finished this one, so that it's not suggested again.</a></p>
       `;
 
-  console.log("Sending email!");
+  console.log(
+    "Sending email for ",
+    randomlySelectedArticle,
+    " at ",
+    new Date().toLocaleString()
+  );
+
   await resendService.emails.send({
     from: "send@read-your-articles.lol",
     to: ["ishaqibrahimbss@gmail.com"],
@@ -101,7 +128,8 @@ app.get("/articles/finished", async (req, res) => {
 
 const server = require("http").createServer(app);
 
-cron.schedule("35 4 * * *", () => {
+// UTC time cause that's what the server uses
+cron.schedule("0 5 * * *", () => {
   sendEmail();
 });
 
