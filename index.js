@@ -101,8 +101,7 @@ app.get("/articles/finished", async (req, res) => {
 
 const server = require("http").createServer(app);
 
-// run cron job day at 9am
-cron.schedule("30 9 * * *", () => {
+cron.schedule("35 4 * * *", () => {
   sendEmail();
 });
 
