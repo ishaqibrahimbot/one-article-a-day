@@ -69,7 +69,7 @@ const sendEmail = async () => {
   await resendService.emails.send({
     from: "send@read-your-articles.lol",
     to: ["ishaqibrahimbss@gmail.com"],
-    subject: "Another one for today!",
+    subject: "From your reading list",
     html: html,
   });
   return;
@@ -102,14 +102,8 @@ app.get("/articles/finished", async (req, res) => {
 const server = require("http").createServer(app);
 
 // run cron job day at 9am
-cron.schedule(
-  "0 9 * * *",
-  () => {
-    sendEmail();
-  },
-  {
-    runOnInit: true,
-  }
-);
+cron.schedule("30 9 * * *", () => {
+  sendEmail();
+});
 
 server.listen(3000, () => console.log("Server is running on port 3000"));
